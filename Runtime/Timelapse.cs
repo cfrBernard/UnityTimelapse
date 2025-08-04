@@ -2,60 +2,170 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 public class Timelapse : MonoBehaviour
 {
-    [Header("Directional Light")]
+    // --- Global settings ---
+    [Tooltip("Total duration of the cycle in seconds.")]
+    public float cycleDuration = 60f;
+
+    [Tooltip("Restart cycle when reaching the end.")]
+    public bool loop = true;
+
+    // --- Directional Light --- 
+    public bool enableSun = true;
     public Light sun;
     public Vector3 sunRotationStart = new Vector3(180f, -30f, 0f);
     public Vector3 sunRotationEnd = new Vector3(0f, -30f, 0f);
 
-    [Header("Volumetric Clouds")]
+    // --- Clouds ---
+    public bool enableClouds = true;
     public Volume volume;
     public Vector3 cloudOffsetStart = Vector3.zero;
     public Vector3 cloudOffsetEnd = new Vector3(100f, 0f, 0f);
 
-    [Header("Timing")]
-    public float cycleDuration = 60f;
-    public bool loop = true;
+    // --- Water ---
+    public bool enableWater = false;
+    public WaterSurface water;
+
+    [Tooltip("Multiplier for water simulation speed during timelapse.")]
+    public float waterTimeMultiplier = 2f;
 
     // --- Internals ---
     private VolumetricClouds clouds;
     private float timer = 0f;
+
     private Vector3 initialCloudOffset;
+    private float initialWaterMultiplier;
 
     void Start()
     {
-        if (volume != null && volume.profile.TryGet(out clouds))
+        // --- Clouds ---
+        if (enableClouds && volume != null && volume.profile.TryGet(out clouds))
         {
             initialCloudOffset = clouds.shapeOffset.value;
         }
-        else
+        else if (enableClouds)
         {
-            Debug.LogWarning("No Volumetric Clouds assigned.");
+            Debug.LogWarning("[Timelapse] Volumetric Clouds reference missing.");
+        }
+
+        // --- Water ---
+        if (enableWater && !loop && water != null)
+        {
+            initialWaterMultiplier = water.timeMultiplier;
+            water.timeMultiplier = waterTimeMultiplier;
+        }
+        else if (enableWater && loop)
+        {
+            Debug.LogWarning("[Timelapse] Water is disabled when Loop is active.");
+        }
+        else if (enableWater)
+        {
+            Debug.LogWarning("[Timelapse] WaterSurface reference missing.");
         }
     }
 
     void Update()
     {
-        if (sun == null || clouds == null) return;
-
-        // Progression (0 → 1)
         timer += Time.deltaTime;
         float t = Mathf.Clamp01(timer / cycleDuration);
 
-        // Directional interpolation
-        Quaternion startRot = Quaternion.Euler(sunRotationStart);
-        Quaternion endRot = Quaternion.Euler(sunRotationEnd);
-        sun.transform.localRotation = Quaternion.Slerp(startRot, endRot, t);
+        // --- Directional Light ---
+        if (enableSun && sun != null)
+        {
+            Quaternion startRot = Quaternion.Euler(sunRotationStart);
+            Quaternion endRot = Quaternion.Euler(sunRotationEnd);
+            sun.transform.localRotation = Quaternion.Slerp(startRot, endRot, t);
+        }
 
-        // Clouds interpolation
-        Vector3 offset = Vector3.Lerp(cloudOffsetStart, cloudOffsetEnd, t);
-        clouds.shapeOffset.value = initialCloudOffset + offset;
+        // --- Clouds ---
+        if (enableClouds && clouds != null)
+        {
+            Vector3 offset = Vector3.Lerp(cloudOffsetStart, cloudOffsetEnd, t);
+            clouds.shapeOffset.value = initialCloudOffset + offset;
+        }
 
-        // Loop
+        // --- Water ---
+        if (!loop && enableWater && water != null)
+        {
+            water.timeMultiplier = waterTimeMultiplier;
+        }
+
+        // --- Reset cycle ---
         if (loop && timer >= cycleDuration)
         {
             timer = 0f;
         }
+        else if (!loop && timer >= cycleDuration)
+        {
+            // Restore Water TimeMultiplier
+            if (enableWater && water != null)
+                water.timeMultiplier = initialWaterMultiplier;
+        }
     }
+
+#if UNITY_EDITOR
+    [CustomEditor(typeof(Timelapse))]
+    public class TimelapseEditor : Editor
+    {
+        public override void OnInspectorGUI()
+        {
+            Timelapse script = (Timelapse)target;
+
+            // --- Global settings ---
+            EditorGUILayout.LabelField("Global Settings", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("cycleDuration"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("loop"));
+            EditorGUILayout.Space();
+
+            // --- Directional Light ---
+            EditorGUILayout.Space(10);    
+            EditorGUILayout.LabelField("Directional Light", EditorStyles.boldLabel);     
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableSun"));
+            if (script.enableSun)
+            {
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("sun"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("sunRotationStart"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("sunRotationEnd"));
+            }
+
+            // --- Clouds ---
+            EditorGUILayout.Space(10);
+            EditorGUILayout.LabelField("Volumetric Clouds", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableClouds"));
+            if (script.enableClouds)
+            {
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("volume"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("cloudOffsetStart"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("cloudOffsetEnd"));
+            }
+
+            // --- Water ---
+            EditorGUILayout.Space(10);
+            EditorGUILayout.LabelField("Water Surface", EditorStyles.boldLabel);
+            if (!script.loop)
+            {
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("enableWater"));
+
+                if (script.enableWater)
+                {
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("water"));
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("waterTimeMultiplier"));
+                }
+            }
+            else
+            {
+                EditorGUILayout.HelpBox("Water control is disabled when Loop is active.", MessageType.Info);
+            }
+
+            GUI.enabled = true;
+
+            serializedObject.ApplyModifiedProperties();
+        }
+    }
+#endif
 }
