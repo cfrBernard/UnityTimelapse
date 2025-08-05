@@ -4,8 +4,6 @@ Simple script designed to quickly create timelapses in Unity HDRP. Ideal for **p
 
 > This project is made/test under Unity 6.1 (6000.1.12f1)
 
-[**Download the latest version here**](Runtime/Timelapse.cs)
-
 ![Version](https://img.shields.io/badge/version-v0.3.0-blue)
 ![License](https://img.shields.io/github/license/cfrBernard/UnityTimelapse)
 
@@ -17,8 +15,8 @@ Simple script designed to quickly create timelapses in Unity HDRP. Ideal for **p
 - Speed curve for smoother transitions
 
 > ### Requirements
-> - Volumetric Clouds (HDRP) if enable
-> - WaterSurface (HDRP) if enable
+> - Volumetric Clouds (HDRP) – *if enable*
+> - WaterSurface (HDRP) – *if enable*
 
 ---
 
@@ -30,12 +28,12 @@ Simple script designed to quickly create timelapses in Unity HDRP. Ideal for **p
 
 ## How to Use:
 
-- Copy the `Timelapse.cs` script into your Unity project.
+- Fork and Copy the project folder (`Runtime/` and `Editor/` are required) into your Unity project.
 - Make sure to use **HDRP** with the necessary components (**Volumetric Clouds** / **WaterSurface**) – *if enable*
 
 ## Setup
 
-1. Create an empty **GameObject** and attach the script to it.
+1. Create an empty **GameObject** and attach `Timelapse.cs` from `Runtime/`.
 2. Assign:
     - The **Directional Light** (the sun)
     - The **Volume** containing the *Volumetric Clouds* component
@@ -43,17 +41,19 @@ Simple script designed to quickly create timelapses in Unity HDRP. Ideal for **p
 
 3. Define:
     - `Cycle Duration` in seconds
+    - `Speed Curve` preset (controls global timelapse speed)
+      > : X=0→1 is progress, Y=0→1 is adjusted speed)
     - Enable/disable Loop, Clouds, Sun, Water as needed
     - `Sun Rotation Start` and `Sun Rotation End` (in degrees, Euler)
     - `Cloud Offset Start` and `Cloud Offset End`
     - And the Water Surface – `Time Multiplier`
 
 
-> If Loop is true, water management is automatically disabled.
+> If Loop is enabled, water management is automatically disabled.
 
 ---
 
-## 🔮 Roadmap (v0.3.x → v1.0.0)
+## 🔮 Roadmap (v0.4.x → v1.0.0)
 
 - **Multi-element Control:**
     - Fog (density, color)
@@ -67,11 +67,9 @@ Simple script designed to quickly create timelapses in Unity HDRP. Ideal for **p
 - **Advanced Options :**
     - Ping-pong (back and forth)
     - Separate timers (clouds ≠ sun)
-    - Custom curves (non-linear)
-    - Custom editor (cleaner interface in the Inspector)
+    - Custom editor (cleaner interface, presets manager)
 
 - **Official Unity package**
-    - UPM structure (`package.json`)
     - Demo scene + presets
     - Asset Store release (v1.0.0)
 
