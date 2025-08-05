@@ -2,15 +2,14 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
 public class Timelapse : MonoBehaviour
 {
     // --- Global settings ---
     [Tooltip("Total duration of the cycle in seconds.")]
     public float cycleDuration = 60f;
+
+    [Tooltip("Curve controlling the global speed of the timelapse. X from 0 to 1 (time progress), Y from 0 to 1 (adjusted progress).")]
+    public AnimationCurve speedCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
 
     [Tooltip("Restart cycle when reaching the end.")]
     public bool loop = true;
@@ -31,7 +30,7 @@ public class Timelapse : MonoBehaviour
     public bool enableWater = false;
     public WaterSurface water;
 
-    [Tooltip("Multiplier for water simulation speed during timelapse.")]
+    [Tooltip("Fixed multiplier for water simulation speed during timelapse.")]
     public float waterTimeMultiplier = 2f;
 
     // --- Internals ---
@@ -72,7 +71,8 @@ public class Timelapse : MonoBehaviour
     void Update()
     {
         timer += Time.deltaTime;
-        float t = Mathf.Clamp01(timer / cycleDuration);
+        float rawT = Mathf.Clamp01(timer / cycleDuration);
+        float t = speedCurve.Evaluate(rawT);
 
         // --- Directional Light ---
         if (enableSun && sun != null)
@@ -102,70 +102,8 @@ public class Timelapse : MonoBehaviour
         }
         else if (!loop && timer >= cycleDuration)
         {
-            // Restore Water TimeMultiplier
             if (enableWater && water != null)
                 water.timeMultiplier = initialWaterMultiplier;
         }
     }
-
-#if UNITY_EDITOR
-    [CustomEditor(typeof(Timelapse))]
-    public class TimelapseEditor : Editor
-    {
-        public override void OnInspectorGUI()
-        {
-            Timelapse script = (Timelapse)target;
-
-            // --- Global settings ---
-            EditorGUILayout.LabelField("Global Settings", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("cycleDuration"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("loop"));
-            EditorGUILayout.Space();
-
-            // --- Directional Light ---
-            EditorGUILayout.Space(10);    
-            EditorGUILayout.LabelField("Directional Light", EditorStyles.boldLabel);     
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableSun"));
-            if (script.enableSun)
-            {
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("sun"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("sunRotationStart"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("sunRotationEnd"));
-            }
-
-            // --- Clouds ---
-            EditorGUILayout.Space(10);
-            EditorGUILayout.LabelField("Volumetric Clouds", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableClouds"));
-            if (script.enableClouds)
-            {
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("volume"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("cloudOffsetStart"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("cloudOffsetEnd"));
-            }
-
-            // --- Water ---
-            EditorGUILayout.Space(10);
-            EditorGUILayout.LabelField("Water Surface", EditorStyles.boldLabel);
-            if (!script.loop)
-            {
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("enableWater"));
-
-                if (script.enableWater)
-                {
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("water"));
-                    EditorGUILayout.PropertyField(serializedObject.FindProperty("waterTimeMultiplier"));
-                }
-            }
-            else
-            {
-                EditorGUILayout.HelpBox("Water control is disabled when Loop is active.", MessageType.Info);
-            }
-
-            GUI.enabled = true;
-
-            serializedObject.ApplyModifiedProperties();
-        }
-    }
-#endif
 }
