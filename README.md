@@ -53,6 +53,17 @@ Simple script designed to quickly create timelapses in Unity HDRP. Ideal for **p
 
 ---
 
+## Helper – Curve to Keyframes
+
+A small tool is included to quickly convert an AnimationCurve into C# code (Keyframes):
+
+- Accessible via `Tools > Curve To Keyframes` in the Unity toolbar
+- Allows you to draw a curve in the editor
+- Clicking "Generate C# Keyframes" automatically copies the code to the clipboard
+- Useful for creating static presets in `SpeedCurvePresets.cs`
+
+---
+
 ## 🔮 Roadmap (v0.4.x → v1.0.0)
 
 - **Multi-element Control:**
