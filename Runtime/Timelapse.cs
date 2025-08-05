@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
@@ -11,6 +12,9 @@ public class Timelapse : MonoBehaviour
     // --- Global settings ---
     [Tooltip("Total duration of the cycle in seconds.")]
     public float cycleDuration = 60f;
+
+    [Tooltip("Curve controlling the global speed of the timelapse. X from 0 to 1 (time progress), Y from 0 to 1 (adjusted progress).")]
+    public AnimationCurve speedCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
 
     [Tooltip("Restart cycle when reaching the end.")]
     public bool loop = true;
@@ -31,7 +35,7 @@ public class Timelapse : MonoBehaviour
     public bool enableWater = false;
     public WaterSurface water;
 
-    [Tooltip("Multiplier for water simulation speed during timelapse.")]
+    [Tooltip("Fixed multiplier for water simulation speed during timelapse.")]
     public float waterTimeMultiplier = 2f;
 
     // --- Internals ---
@@ -72,7 +76,8 @@ public class Timelapse : MonoBehaviour
     void Update()
     {
         timer += Time.deltaTime;
-        float t = Mathf.Clamp01(timer / cycleDuration);
+        float rawT = Mathf.Clamp01(timer / cycleDuration);
+        float t = speedCurve.Evaluate(rawT);
 
         // --- Directional Light ---
         if (enableSun && sun != null)
@@ -102,11 +107,11 @@ public class Timelapse : MonoBehaviour
         }
         else if (!loop && timer >= cycleDuration)
         {
-            // Restore Water TimeMultiplier
             if (enableWater && water != null)
                 water.timeMultiplier = initialWaterMultiplier;
         }
     }
+
 
 #if UNITY_EDITOR
     [CustomEditor(typeof(Timelapse))]
@@ -119,6 +124,14 @@ public class Timelapse : MonoBehaviour
             // --- Global settings ---
             EditorGUILayout.LabelField("Global Settings", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("cycleDuration"));
+            // Dropdown Presets
+            string[] presetNames = SpeedCurvePresets.Presets.Select(p => p.name).ToArray();
+            int selectedPreset = EditorGUILayout.Popup("Speed Curve Preset", -1, presetNames);
+            if (selectedPreset >= 0)
+            {
+                script.speedCurve = SpeedCurvePresets.Presets[selectedPreset].curve;
+            }
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("speedCurve"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("loop"));
             EditorGUILayout.Space();
 

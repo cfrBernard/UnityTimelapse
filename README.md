@@ -1,12 +1,12 @@
 # UnityTimelapse
 
-Simple script designed to quickly create timelapses in Unity HDRP. Ideal for **presenting scenes, cinematics, or testing lighting variations** without using Timeline. **Version 0.2.0** -> Has only a directional light rotation, volumetric cloud offset animation and water simulation speed.
+Simple script designed to quickly create timelapses in Unity HDRP. Ideal for **presenting scenes, cinematics, or testing lighting variations** without using Timeline. **Version 0.3.0** -> Has only a directional light rotation, volumetric cloud offset animation and water simulation speed.
 
 > This project is made/test under Unity 6.1 (6000.1.12f1)
 
 [**Download the latest version here**](Runtime/Timelapse.cs)
 
-![Version](https://img.shields.io/badge/version-v0.2.0-blue)
+![Version](https://img.shields.io/badge/version-v0.3.0-blue)
 ![License](https://img.shields.io/github/license/cfrBernard/UnityTimelapse)
 
 ## Features:
@@ -14,6 +14,7 @@ Simple script designed to quickly create timelapses in Unity HDRP. Ideal for **p
 - Volumetric Clouds offset animation
 - Water simulation speed (HDRP Water)
 - Customizable duration, loop option
+- Speed curve for smoother transitions
 
 > ### Requirements
 > - Volumetric Clouds (HDRP) if enable
@@ -22,7 +23,7 @@ Simple script designed to quickly create timelapses in Unity HDRP. Ideal for **p
 ---
 
 <p align="center">
-  <img src="Assets/Demo/DemoGif_v0.2.0.gif" alt="DemoGIF v0.2.0" />
+  <img src="Assets/Demo/DemoGif_v0.3.0.gif" alt="DemoGIF v0.3.0" />
 </p>
 
 ---
