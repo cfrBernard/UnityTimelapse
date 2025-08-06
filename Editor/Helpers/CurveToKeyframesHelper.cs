@@ -36,15 +36,14 @@ public class CurveToKeyframesHelper : EditorWindow
 
     string GenerateKeyframeCode(AnimationCurve c)
     {
-        string code = "new AnimationCurve(\n";
+        string code = "(\"PresetName\", new AnimationCurve(\n";
         for (int i = 0; i < c.keys.Length; i++)
         {
             Keyframe k = c.keys[i];
             code += $"    new Keyframe({k.time}f, {k.value}f, {k.inTangent}f, {k.outTangent}f)";
             if (i < c.keys.Length - 1) code += ",\n";
         }
-        code += "\n);";
+        code += "\n)),";
         return code;
     }
 }
-
