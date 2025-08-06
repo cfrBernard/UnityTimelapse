@@ -36,6 +36,7 @@ public class Timelapse : MonoBehaviour
     // --- Internals ---
     private VolumetricClouds clouds;
     private float timer = 0f;
+    private float lastCurveValue = 0f;
 
     private Vector3 initialCloudOffset;
     private float initialWaterMultiplier;
@@ -72,8 +73,15 @@ public class Timelapse : MonoBehaviour
     {
         timer += Time.deltaTime;
         float rawT = Mathf.Clamp01(timer / cycleDuration);
-        float t = speedCurve.Evaluate(rawT);
-
+        float curveValue = speedCurve.Evaluate(rawT);
+    
+        // Progress for position
+        float t = curveValue;
+    
+        // Derivative for speed
+        float curveSpeed = (curveValue - lastCurveValue) / Time.deltaTime;
+        lastCurveValue = curveValue;
+    
         // --- Directional Light ---
         if (enableSun && sun != null)
         {
@@ -81,24 +89,26 @@ public class Timelapse : MonoBehaviour
             Quaternion endRot = Quaternion.Euler(sunRotationEnd);
             sun.transform.localRotation = Quaternion.Slerp(startRot, endRot, t);
         }
-
+    
         // --- Clouds ---
         if (enableClouds && clouds != null)
         {
             Vector3 offset = Vector3.Lerp(cloudOffsetStart, cloudOffsetEnd, t);
             clouds.shapeOffset.value = initialCloudOffset + offset;
         }
-
+    
         // --- Water ---
         if (!loop && enableWater && water != null)
         {
-            water.timeMultiplier = waterTimeMultiplier;
+            float targetSpeed = waterTimeMultiplier * curveSpeed;
+            water.timeMultiplier = Mathf.Max(initialWaterMultiplier, targetSpeed);
         }
-
+    
         // --- Reset cycle ---
         if (loop && timer >= cycleDuration)
         {
             timer = 0f;
+            lastCurveValue = 0f;
         }
         else if (!loop && timer >= cycleDuration)
         {
