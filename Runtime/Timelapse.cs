@@ -85,9 +85,8 @@ public class Timelapse : MonoBehaviour
         // --- Directional Light ---
         if (enableSun && sun != null)
         {
-            Quaternion startRot = Quaternion.Euler(sunRotationStart);
-            Quaternion endRot = Quaternion.Euler(sunRotationEnd);
-            sun.transform.localRotation = Quaternion.Slerp(startRot, endRot, t);
+            float angle = Mathf.Lerp(sunRotationStart.x, sunRotationEnd.x, t);
+            sun.transform.localRotation = Quaternion.Euler(angle, sunRotationStart.y, sunRotationStart.z);
         }
     
         // --- Clouds ---
