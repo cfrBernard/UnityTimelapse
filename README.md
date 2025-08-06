@@ -53,6 +53,40 @@ Simple script designed to quickly create timelapses in Unity HDRP. Ideal for **p
 
 ---
 
+## Loop Mode (Day/Night Cycle)
+
+The `Timelapse` script was not originally designed as a full day/night cycle system. However, using the Loop mode, you can simulate a continuous cycle easily – useful for quick **prototypes** or **scene presentations**.
+
+### Quick Setup
+
+1. **Enable the sun**
+    - Assign a `Directional Light` to the `sun` variable.
+    - Set:
+      ```
+      sunRotationStart = new Vector3(0f, -30f, 0f);
+      sunRotationEnd   = new Vector3(360f, -30f, 0f);
+      ```
+    - The cycle will interpolate from 0° to 360° for a perfectly seamless loop.
+
+2. **Enable clouds (optional)**
+    - Clouds use a simple offset (`cloudOffsetStart` → `cloudOffsetEnd`).
+    - No special setup needed: the loop remains seamless since the offset repeats naturally.
+
+3. **Water handling**
+    - When `loop = true`, water is automatically disabled (no `timeMultiplier`).
+    - When `loop = false`, water can be animated using `waterTimeMultiplier`.
+
+### ⚠️ Important 
+> **This is not intended as a full production day/night system**. <br>
+> For a production-ready solution, consider using:
+>   - Unity Timeline
+>   - Specialized lighting/skybox frameworks
+>   - Or a custom system handling weather, ambient lighting, etc.
+
+This Loop mode is mainly a **bonus feature** for **fast timelapse prototypes** or **scene showcases**.
+
+---
+
 ## Helper – Curve to Keyframes
 
 A small tool is included to quickly convert an AnimationCurve into C# code (Keyframes):
