@@ -24,13 +24,14 @@ public class TimelapseEditor : Editor
 
             // Dropdown Presets
             string[] presetNames = SpeedCurvePresets.Presets.Select(p => p.name).ToArray();
-            int selectedPreset = EditorGUILayout.Popup("Speed Curve Preset", -1, presetNames);
-            if (selectedPreset >= 0)
+            int currentIndex = System.Array.FindIndex(SpeedCurvePresets.Presets, p => p.name == script.selectedPresetName);
+            int selectedIndex = EditorGUILayout.Popup("Speed Curve Preset", currentIndex, presetNames);
+            if (selectedIndex >= 0 && selectedIndex != currentIndex)
             {
-                script.speedCurve = SpeedCurvePresets.Presets[selectedPreset].curve;
+                script.speedCurve = SpeedCurvePresets.Presets[selectedIndex].curve;
+                script.selectedPresetName = SpeedCurvePresets.Presets[selectedIndex].name;
             }
             EditorGUILayout.PropertyField(serializedObject.FindProperty("speedCurve"));
-
             EditorGUILayout.PropertyField(serializedObject.FindProperty("loop"));
 
             EditorGUI.indentLevel--;

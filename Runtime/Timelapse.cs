@@ -38,6 +38,8 @@ public class Timelapse : MonoBehaviour
     public float waterTimeMultiplier = 2f;
 
     // --- Internals ---
+    public string selectedPresetName = "";
+    
     private VolumetricClouds clouds;
     private float timer = 0f;
     private float lastCurveValue = 0f;
