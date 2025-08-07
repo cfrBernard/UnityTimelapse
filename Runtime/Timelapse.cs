@@ -76,20 +76,40 @@ public class Timelapse : MonoBehaviour
 
     void Update()
     {
-        if (!hasStarted)
+        if (Keyboard.current != null && Keyboard.current[startKey].wasPressedThisFrame)
         {
-            if (Keyboard.current != null && Keyboard.current[startKey].wasPressedThisFrame)
+            if (!hasStarted)
             {
-                hasStarted = true;
-                Debug.Log("[Timelapse] Started with key: " + startKey);
+                StartTimelapse();
             }
             else
             {
-                return;
+                ResetTimelapse();
             }
         }
+    
+        if (hasStarted)
+        {
+            RunTimelapse();
+        }
+    }
+    
+    private void StartTimelapse()
+    {
+        hasStarted = true;
+        timer = 0f;
+        lastCurveValue = 0f;
+        Debug.Log("[Timelapse] Started");
+    }
 
-        RunTimelapse();
+    private void ResetTimelapse()
+    {
+        hasStarted = false;
+        if (enableWater && water != null)
+        {
+            water.timeMultiplier = initialWaterMultiplier;
+        }
+        Debug.Log("[Timelapse] Reset");
     }
 
     private void RunTimelapse()
@@ -97,28 +117,28 @@ public class Timelapse : MonoBehaviour
         timer += Time.deltaTime;
         float rawT = Mathf.Clamp01(timer / cycleDuration);
         float curveValue = speedCurve.Evaluate(rawT);
-    
+
         // Progress for position
         float t = curveValue;
-    
+
         // Derivative for speed
         float curveSpeed = (curveValue - lastCurveValue) / Time.deltaTime;
         lastCurveValue = curveValue;
-    
+
         // --- Directional Light ---
         if (enableSun && sun != null)
         {
             float angle = Mathf.Lerp(sunRotationStart.x, sunRotationEnd.x, t);
             sun.transform.localRotation = Quaternion.Euler(angle, sunRotationStart.y, sunRotationStart.z);
         }
-    
+
         // --- Clouds ---
         if (enableClouds && clouds != null)
         {
             Vector3 offset = Vector3.Lerp(cloudOffsetStart, cloudOffsetEnd, t);
             clouds.shapeOffset.value = initialCloudOffset + offset;
         }
-    
+
         // --- Water ---
         if (!loop && enableWater && water != null)
         {
@@ -130,7 +150,7 @@ public class Timelapse : MonoBehaviour
             float targetSpeed = waterTimeMultiplier * curveSpeed;
             water.timeMultiplier = Mathf.Max(initialWaterMultiplier, targetSpeed);
         }
-    
+
         // --- Reset cycle ---
         if (loop && timer >= cycleDuration)
         {
