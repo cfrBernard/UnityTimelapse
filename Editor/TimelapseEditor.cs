@@ -20,6 +20,7 @@ public class TimelapseEditor : Editor
             script.speedCurve = SpeedCurvePresets.Presets[selectedPreset].curve;
         }
         EditorGUILayout.PropertyField(serializedObject.FindProperty("speedCurve"));
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("startKey"));
         EditorGUILayout.PropertyField(serializedObject.FindProperty("loop"));
         EditorGUILayout.Space();
 

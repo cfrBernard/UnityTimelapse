@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
+using UnityEngine.InputSystem;
 
 public class Timelapse : MonoBehaviour
 {
@@ -10,6 +11,9 @@ public class Timelapse : MonoBehaviour
 
     [Tooltip("Curve controlling the global speed of the timelapse. X from 0 to 1 (time progress), Y from 0 to 1 (adjusted progress).")]
     public AnimationCurve speedCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
+
+    [Tooltip("Input key to start the timelapse.")]
+    public Key startKey = Key.Space;
 
     [Tooltip("Restart cycle when reaching the end.")]
     public bool loop = true;
@@ -41,6 +45,8 @@ public class Timelapse : MonoBehaviour
     private Vector3 initialCloudOffset;
     private float initialWaterMultiplier;
 
+    private bool hasStarted = false;
+
     void Start()
     {
         // --- Clouds ---
@@ -57,7 +63,6 @@ public class Timelapse : MonoBehaviour
         if (enableWater && !loop && water != null)
         {
             initialWaterMultiplier = water.timeMultiplier;
-            water.timeMultiplier = waterTimeMultiplier;
         }
         else if (enableWater && loop)
         {
@@ -70,6 +75,24 @@ public class Timelapse : MonoBehaviour
     }
 
     void Update()
+    {
+        if (!hasStarted)
+        {
+            if (Keyboard.current != null && Keyboard.current[startKey].wasPressedThisFrame)
+            {
+                hasStarted = true;
+                Debug.Log("[Timelapse] Started with key: " + startKey);
+            }
+            else
+            {
+                return;
+            }
+        }
+
+        RunTimelapse();
+    }
+
+    private void RunTimelapse()
     {
         timer += Time.deltaTime;
         float rawT = Mathf.Clamp01(timer / cycleDuration);
@@ -99,6 +122,11 @@ public class Timelapse : MonoBehaviour
         // --- Water ---
         if (!loop && enableWater && water != null)
         {
+            if (Mathf.Approximately(timer, 0f))
+            {
+                water.timeMultiplier = waterTimeMultiplier;
+            }
+
             float targetSpeed = waterTimeMultiplier * curveSpeed;
             water.timeMultiplier = Mathf.Max(initialWaterMultiplier, targetSpeed);
         }
