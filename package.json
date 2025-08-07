@@ -1,6 +1,6 @@
 {
     "name": "com.cfrbernard.unitytimelapse",
-    "version": "0.3.3",
+    "version": "0.4.3",
     "displayName": "Unity Timelapse",
     "description": "Script designed to quickly create timelapses in Unity HDRP.",
     "unity": "6000.1",

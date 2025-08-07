@@ -5,6 +5,8 @@ using System.Linq;
 [CustomEditor(typeof(Timelapse))]
 public class TimelapseEditor : Editor
 {
+    private bool showAdvanced = false;
+    
     public override void OnInspectorGUI()
     {
         Timelapse script = (Timelapse)target;
@@ -12,20 +14,32 @@ public class TimelapseEditor : Editor
         // --- Global settings ---
         EditorGUILayout.LabelField("Global Settings", EditorStyles.boldLabel);
         EditorGUILayout.PropertyField(serializedObject.FindProperty("cycleDuration"));
-        // Dropdown Presets
-        string[] presetNames = SpeedCurvePresets.Presets.Select(p => p.name).ToArray();
-        int selectedPreset = EditorGUILayout.Popup("Speed Curve Preset", -1, presetNames);
-        if (selectedPreset >= 0)
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("startKey"));
+
+        // --- Advanced Properties (Foldout) ---
+        showAdvanced = EditorGUILayout.Foldout(showAdvanced, "Advanced Properties");
+        if (showAdvanced)
         {
-            script.speedCurve = SpeedCurvePresets.Presets[selectedPreset].curve;
+            EditorGUI.indentLevel++;
+
+            // Dropdown Presets
+            string[] presetNames = SpeedCurvePresets.Presets.Select(p => p.name).ToArray();
+            int currentIndex = System.Array.FindIndex(SpeedCurvePresets.Presets, p => p.name == script.selectedPresetName);
+            int selectedIndex = EditorGUILayout.Popup("Speed Curve Preset", currentIndex, presetNames);
+            if (selectedIndex >= 0 && selectedIndex != currentIndex)
+            {
+                script.speedCurve = SpeedCurvePresets.Presets[selectedIndex].curve;
+                script.selectedPresetName = SpeedCurvePresets.Presets[selectedIndex].name;
+            }
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("speedCurve"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("loop"));
+
+            EditorGUI.indentLevel--;
         }
-        EditorGUILayout.PropertyField(serializedObject.FindProperty("speedCurve"));
-        EditorGUILayout.PropertyField(serializedObject.FindProperty("loop"));
-        EditorGUILayout.Space();
 
         // --- Directional Light ---
-        EditorGUILayout.Space(10);    
-        EditorGUILayout.LabelField("Directional Light", EditorStyles.boldLabel);     
+        EditorGUILayout.Space(10);
+        EditorGUILayout.LabelField("Directional Light", EditorStyles.boldLabel);
         EditorGUILayout.PropertyField(serializedObject.FindProperty("enableSun"));
         if (script.enableSun)
         {
