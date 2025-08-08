@@ -5,7 +5,7 @@ Simple script designed to quickly create timelapses in Unity HDRP. Ideal for **p
 > This project is made/test under Unity 6.1 (6000.1.12f1)
 
 ![Version](https://img.shields.io/badge/version-v0.4.3-blue)
-![License](https://img.shields.io/github/license/cfrBernard/UnityTimelapse)
+[![License](https://img.shields.io/github/license/cfrBernard/UnityTimelapse)](./LICENSE.md)
 
 ## Features:
 - Interpolated sun rotation (Directional Light)
