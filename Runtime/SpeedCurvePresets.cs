@@ -4,9 +4,15 @@ public class SpeedCurvePresets
 {
     public static readonly (string name, AnimationCurve curve)[] Presets = new (string, AnimationCurve)[]
     {
-        ("Linear", AnimationCurve.Linear(0f, 0f, 1f, 1f)),
+        ("Linear", new AnimationCurve(
+            new Keyframe(0f, 0f, 0f, 1f),
+            new Keyframe(1f, 1f, 1f, 0f)
+        )),
 
-        ("Ease In|Out", AnimationCurve.EaseInOut(0f, 0f, 1f, 1f)),
+        ("Ease In|Out", new AnimationCurve(
+            new Keyframe(0f, 0f, 0f, 0f),
+            new Keyframe(1f, 1f, 0f, 0f)
+        )),
 
         ("Slow Out", new AnimationCurve(
             new Keyframe(0f, 0f, 2f, 2f),
@@ -21,6 +27,6 @@ public class SpeedCurvePresets
         ("Custom", new AnimationCurve(
             new Keyframe(0f, 0f, 0f, 1f),
             new Keyframe(1f, 1f, 1f, 0f)
-        )),
+        ))
     };
 }
